@@ -1,0 +1,580 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://queue.fal.run/fal-ai/gpt-image-1/text-to-image/byok",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=KEY {{ $json.KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"prompt\": \"{{ $json.prompt }}\",\n  \"image_size\": \"1024x1536\",\n  \"num_images\": 1,\n  \"quality\": \"high\",\n  \"background\": \"auto\",\n  \"openai_api_key\": \"sk-proj-aTGfjl1K1W8ieZs8gRgşT3BlbkFJHnuWBO1SxB51jfQtA29g\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -340,
+        8420
+      ],
+      "id": "18857a09-1cde-426a-b7c0-96dbc01d4112",
+      "name": "fal.ai"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f21e0698-024d-4645-af39-8c673b11a2ab",
+              "name": "KEY",
+              "value": "471b67fc-e1b8-4053-8c54-62bf07334d49:e449c8e121eb9c74871306e686b49a5c",
+              "type": "string"
+            },
+            {
+              "id": "c6f3171a-bafa-4cff-b137-b9dcd18c9cf2",
+              "name": "prompt",
+              "value": "={{ $('AI Agent1').item.json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -560,
+        8420
+      ],
+      "id": "e777d692-c7d6-4c02-8a8b-33537bafa0eb",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "amount": 120
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -120,
+        8420
+      ],
+      "id": "5efcd11d-5da8-48d0-a538-e4793907911b",
+      "name": "Wait18",
+      "webhookId": "a2a43e89-4df1-4d0f-88e5-fe69fa4c6fcf"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0283538a-3c01-45d6-8278-76c057e4582b",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "COMPLETED",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        320,
+        8420
+      ],
+      "id": "35b8ee78-6021-4899-a43b-f21d9fe5b2f5",
+      "name": "If3"
+    },
+    {
+      "parameters": {
+        "url": "=https://queue.fal.run/fal-ai/gpt-image-1/requests/{{ $json.request_id }}/status",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=KEY {{ $('Edit Fields2').item.json.KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        100,
+        8420
+      ],
+      "id": "b210cd23-9363-4bd8-a820-fa49145d76fe",
+      "name": "Yanıt İstek"
+    },
+    {
+      "parameters": {
+        "url": "=https://queue.fal.run/fal-ai/gpt-image-1/requests/{{ $json.request_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=KEY {{ $('Edit Fields2').item.json.KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1600,
+        8820
+      ],
+      "id": "bec82440-bbcb-4ee4-b2e4-6a427503a63f",
+      "name": "İstek Sonuç"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.images[0].url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1400,
+        8820
+      ],
+      "id": "5936441c-3882-4991-90c2-679582251692",
+      "name": "Görsel İndir"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.cloudinary.com/v1_1/dpdgqdgmd/image/upload",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "file",
+              "value": "={{ $json.images[0].url }}"
+            },
+            {
+              "name": "upload_preset",
+              "value": "n8n_unsigned"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1180,
+        8820
+      ],
+      "id": "d6ab0f1f-0418-47c2-b22a-2bd905e8a490",
+      "name": "Cloudinary"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6f749061-7223-417a-b2ce-8ffb75258720",
+              "name": "resized_url",
+              "value": "=https://res.cloudinary.com/dpegqdgmd/image/upload/c_pad,w_1024,h_1350,b_white/{{ $json.public_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -980,
+        8820
+      ],
+      "id": "db583a13-cc7d-4e06-b55c-8413adbd9f73",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v22.0",
+        "node": "17741467558430104",
+        "edge": "media",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "image_url",
+                "value": "={{ $json.resized_url }}"
+              },
+              {
+                "name": "caption",
+                "value": "={{ $('AI Agent1').item.json.output }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        -760,
+        8820
+      ],
+      "id": "40aa93dd-9545-4e13-a529-bad63aab148a",
+      "name": "Instagram/Image Upload1",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "0hBHtYbIlDGMHVHj",
+          "name": "Facebook Graph account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v22.0",
+        "node": "16831467558430104",
+        "edge": "media_publish",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "creation_id",
+                "value": "={{ $json.id }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        -340,
+        8820
+      ],
+      "id": "939e975d-d5f6-460b-92dc-a8d6922d7ac6",
+      "name": "Post To Instagram",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "1hBHtYbIlDGMHVHj",
+          "name": "Facebook Graph account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 20
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -540,
+        8820
+      ],
+      "id": "870f3ae5-a40d-4d4c-890b-7e059ac078fb",
+      "name": "Wait9",
+      "webhookId": "a2a43e89-4df1-4d0f-88e5-fe69fa4c6fcf"
+    },
+    {
+      "parameters": {
+        "jsCode": "const destinations = [\"İstanbul (IST)\", \"Dubai (DXB)\", \"Antalya (AYT)\", \"Bakü (GYD)\", \"İstanbul (İHL)\", \"Sabiha Gökçen (SAW)\" ];\nconst random = destinations[Math.floor(Math.random() * destinations.length)];\nreturn [{ json: { destination: random } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1380,
+        8420
+      ],
+      "id": "07cb55ad-e0ae-40c7-a0db-9b54cb3968ad",
+      "name": "Code3"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a professional creative director working for a luxury transfer company. Your mission is to generate premium text-to-image prompts for VIP airport transfer ads.\n\nGOAL: Create a 9:16 vertical poster (1080x1920px) promoting **{{ $('Code3').item.json.destination }} Airport Transfers** with sleek vehicle visuals.\n\nSTRUCTURE:\n- Hero image (60%): Black Mercedes V-Class at {{ $('Code3').item.json.destination }} Airport with motion blur\n- Supporting visuals (30%): Airport terminal entrance + luxury cabin interior\n- Bold headline: \"{{ $json.headline }}\" (centered top)\n- Red '10% OFF' badge (top-right)\n- Gold 'BOOK NOW' button (center-bottom)\n- Location tags: 'TERMINAL 1' on terminal image\n- 100px safe margins\n\nSTYLE:\n- Luxury automotive photography\n- Night/dusk lighting for premium feel\n- Dark color scheme with gold accents",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -940,
+        8420
+      ],
+      "id": "8917e2ea-a0f6-493d-a991-1768fe477d52",
+      "name": "AI Agent2"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1160,
+        8660
+      ],
+      "id": "e4a54af4-cd19-4ae6-8c43-95ad5ee56f5a",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "9gcQkILP5gMPds14",
+          "name": "hakan api"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const titles = [\n  `VIP TRANSFER FROM ${$json.destination}`,\n  `SEAMLESS ${$json.destination} TRANSFERS`,\n  `LUXURY RIDE TO ${$json.destination.split(' ')[0]} CITY`,\n  `STRESS-FREE ${$json.destination} ARRIVALS`\n];\nconst randomIndex = Math.floor(Math.random() * titles.length);\nreturn [{ json: { headline: titles[randomIndex] } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1180,
+        8420
+      ],
+      "id": "97f76c48-9544-41ca-9f45-53eac0764e80",
+      "name": "Code4"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 14
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1580,
+        8420
+      ],
+      "id": "b8098c69-d55f-4c59-adac-c211a77d291b",
+      "name": "Schedule Trigger15"
+    }
+  ],
+  "connections": {
+    "fal.ai": {
+      "main": [
+        [
+          {
+            "node": "Wait18",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "fal.ai",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait18": {
+      "main": [
+        [
+          {
+            "node": "Yanıt İstek",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "İstek Sonuç",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait18",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Yanıt İstek": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "İstek Sonuç": {
+      "main": [
+        [
+          {
+            "node": "Görsel İndir",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Görsel İndir": {
+      "main": [
+        [
+          {
+            "node": "Cloudinary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cloudinary": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Instagram/Image Upload1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Instagram/Image Upload1": {
+      "main": [
+        [
+          {
+            "node": "Wait9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait9": {
+      "main": [
+        [
+          {
+            "node": "Post To Instagram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code3": {
+      "main": [
+        [
+          {
+            "node": "Code4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code4": {
+      "main": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger15": {
+      "main": [
+        [
+          {
+            "node": "Code3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "20386acce038557414924b756c7db17e014128c90fcf4c8f1597fe470bdcfe3a"
+  }
+}
